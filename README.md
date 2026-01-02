@@ -1,78 +1,90 @@
 👶 SmartCry: Yapay Zekâ Tabanlı Akıllı Bebek Analiz Sistemi
+SmartCry, bebeklerin ağlama seslerini gerçek zamanlı analiz ederek nedenini (açlık, ağrı, uykusuzluk vb.) belirleyen ve ebeveynlere mobil uygulama üzerinden bildirim sunan IoT tabanlı bir araştırma projesidir. Bu çalışma, TÜBİTAK 2209-A programı kapsamında desteklenmektedir.
 
-SmartCry, bebeklerin ağlama seslerini gerçek zamanlı analiz ederek nedenini belirleyen ve ebeveynlere mobil uygulama üzerinden bildirim sunan IoT tabanlı bir projedir. 
-Mersin Üniversitesi bünyesinde yürütülen bu çalışma, düşük maliyetli ve taşınabilir bir yerli prototip sunmayı amaçlamaktadır.
+🛠️ 1. Gereksinim Analizi (Requirement Analysis)
+A. İşlevsel Gereksinimler (Functional Requirements)
+Ses Analizi: Cihaz, bebek ağlamasını %80+ doğrulukla sınıflandırmalıdır.
 
-📋 Proje Özeti
-Bebekler ihtiyaçlarını sözel ifade edemedikleri için ağlama, temel bir iletişim aracıdır.
-Bu proje, ebeveynlerin stresini azaltmak ve asfiksi (nefessiz kalma) gibi hayati riskleri erken tespit etmek amacıyla yapay zekâ tabanlı bir analiz sistemi sunar.
-Sistem, %36,7 oranla en yüksek bebek ölümü nedeni olan asfiksiye karşı erken uyarı mekanizması olarak tasarlanmıştır.
+Görüntü İşleme: Bebek hareketliliği ESP32-CAM üzerinden anlık takip edilmelidir.
 
-🌟 Öne Çıkan Özellikler
+Anlık Bildirim: Analiz sonucu 3 saniye içerisinde ebeveynin mobil uygulamasına iletilmelidir.
 
-🔍 Akıllı Ses Sınıflandırma: Bebek ağlamalarını CNN modelleri kullanarak açlık, uyku ihtiyacı ve rahatsızlık kategorilerine ayırır.
+Veri Yönetimi: Geçmiş analiz sonuçları Firebase üzerinden saklanmalı ve görüntülenebilmelidir.
 
-🧠 Edge AI (TinyML): Analiz, internete ihtiyaç duymadan doğrudan ESP32 mikrodenetleyici üzerinde gerçekleşir.
+B. İşlevsel Olmayan Gereksinimler (Non-Functional Requirements)
+Güvenlik ve Gizlilik: Görüntü ve ses verileri bulutta saklanmaz, analiz "Edge Computing" (cihaz üzerinde) yöntemiyle yapılır.
 
-📷 Kamera Entegrasyonu: Bebek hareketliliği ve pozisyonu analiz edilerek ses sonucuyla birleştirilir.
+Performans: Sistem düşük gecikmeli (low latency) çalışmalıdır.
 
-📱 Mobil Bildirim: Flutter ile geliştirilen uygulama üzerinden ebeveyne anlık anlamlı bildirimler iletilir.
+Kullanılabilirlik: Mobil arayüz, teknik bilgisi olmayan ebeveynler için sade olmalıdır.
 
-🔒 Gizlilik ve Güvenlik: Veriler cihaz üzerinde işlenir (edge computing), aile mahremiyeti korunur.
+🎭 2. Use-Case ve Kullanıcı Etkileşimi
+Kullanıcı Kimlere Hizmet Veriyor?
 
-🏗️ Sistem Mimarisi
-Araştırma önerisinde belirtilen Sistem Akışı Şeması uyarınca mimari şu şekildedir:
+Ebeveynler: Bebeğinin ihtiyacını anlamakta zorlanan veya uzaktan takip etmek isteyen ebeveynler.
 
-Analiz Katmanı (Python): librosa kullanılarak MFCC ve Mel-Spektrogram öznitelikleri çıkarılır, CNN modeli eğitilir.
+Bakıcılar: Bebeğin konforunu ve güvenliğini sağlamakla görevli kişiler.
 
-Donanım Katmanı (ESP32): Eğitilen model TensorFlow Lite Micro (TinyML) formatına dönüştürülerek donanıma gömülür.
+Ana Senaryo (Main Scenario)
+Bebek ağlamaya başlar.
 
-Haberleşme Katmanı: Wi-Fi üzerinden Firebase kullanılarak cihaz ve mobil uygulama arasında veri köprüsü kurulur.
+ESP32-CAM üzerindeki I2S mikrofon sesi yakalar.
 
-Arayüz Katmanı (Flutter): Analiz sonuçları ve canlı görüntü ebeveyne sunulur.
+Cihaz üzerindeki TinyML modeli sesi analiz eder (Açlık/Ağrı/Uyku).
 
-📂 Dosya Yapısı
-Bash
+Eş zamanlı olarak kamera, bebeğin hareketlilik skorunu belirler.
 
-├── ai_model/              # Python: MFCC öznitelik çıkarımı ve CNN model eğitim scriptleri 
-├── esp32_firmware/        # C++: ESP32-CAM, I2S Mikrofon ve TinyML entegrasyonu [cite: 252, 272]
-├── flutter-app/           # Dart: Flutter mobil uygulama kaynak kodları [cite: 254, 272]
-├── docs/                  # Proje şemaları, araştırma önerisi ve TÜBİTAK belgeleri [cite: 3]
-└── README.md              # Proje dökümantasyonu
+Sonuç Wi-Fi üzerinden Firebase'e, oradan Flutter uygulamasına düşer.
 
+Ebeveyn telefonunda "Bebeğiniz acıkmış olabilir" bildirimini görür.
 
-📊 Teknik Detaylar (Ön İşleme)Projede kullanılan MFCC öznitelik çıkarımı mantığı şöyledir15:
-Örnekleme Hızı ($sr$): 16000 Hz
-MFCC Sayısı: 40.
-Z-Score Normalizasyonu: Gürültü etkisini azaltmak ve model başarısını artırmak için uygulanır.
+📊 3. Akış Diyagramı (Flowchart) ve Mimari
+Sistem, ses sinyalinin alınmasından mobil bildirime kadar şu yolu izler:
 
-👥 Ekip ve Danışman
-Danışman: Hüseyin Yanık (Mersin Üniversitesi) 
+📂 4. Dosya Yapısı ve Görevleri
+├── ai_model/              # Python: MFCC öznitelik çıkarımı ve CNN model eğitim scriptleri
+├── esp32_firmware/        # C++: ESP32-CAM, I2S Mikrofon ve TinyML entegrasyonu
+├── flutter-app/           # Dart: Flutter mobil uygulama kaynak kodları
+├── docs/                  # UML Diyagramları, Gereksinim Analizi ve TÜBİTAK Belgeleri
+└── README.md              # Ana proje dökümantasyonu
 
-Yürütücü: Gülsu Küçük 
+🚀 5. Kurulum ve Çalıştırma Rehberi (Adım Adım)
+A. Projeyi Klonlama (Repo Alımı)
+Masaüstünde terminali açın ve şu komutu yazarak projeyi bilgisayarınıza indirin:
+git clone https://github.com/hilaleserr/SmartCry-telsiz.git
+cd SmartCry-telsiz
 
-Araştırmacılar: Hilal Şuheda Eser, Meysem Bakır, Bilge Bektaş, Çağla Kuş
+B. VS Code ile Çalıştırma (Python/AI Katmanı)
+VS Code'da ai_model klasörünü açın.
 
-Bu Dosyayı GitHub'a Nasıl Atarsın?
-Masaüstündeki SmartCry klasöründe sağ tıkla -> Git Bash Here.
-
-Şu komutları sırasıyla yaz:
-# Not defteri ile açıp yukarıdaki metni README.md içine kaydet, sonra:
-git add README.md
-git commit -m "Profesyonel README dökümantasyonu eklendi"
-git push origin main
+Gerekli kütüphaneleri terminalden yükleyin:
+pip install librosa tensorflow numpy matplotlib scikit-learn
 
 
+Paylaşılan preprocess.py dosyasını açıp çalıştırarak öznitelik çıkarımını test edin.
 
+C. Mobil Uygulama (Flutter Katmanı)
+VS Code'da flutter-app klasörünü açın.
 
+Terminalden paketleri çekin:
+flutter pub get
 
+Android Studio Emulator veya fiziksel cihaz bağlayarak projeyi başlatın:
+flutter run
 
+D. Donanım (ESP32 Katmanı)
+Arduino IDE'de "AI Thinker ESP32-CAM" kartını seçin.
 
+esp32_firmware içindeki kodu açın, Wi-Fi ve Firebase bilgilerinizi güncelleyin.
 
+"Upload" diyerek kodu cihaza yükleyin.
 
+👥 Ekip Bilgileri
+Danışman: Hüseyin YANIK (Mersin Üniversitesi)
 
+Yürütücü: Gülsu KÜÇÜK
 
-
+Araştırmacılar: Hilal Şuheda ESER, Meysem BAKİR, Bilge BEKTAŞ, Çağla KUŞ
 
 
 
